@@ -73,29 +73,6 @@
 	  this.height = options.height || 25;
 	  this.wingspan = options.wingspan || 52;
 	  this.tailspan = options.tailspan || 16;
-	  // var xMid = x + (width/2);
-	  // // fuselage
-	  // context.fillRect(x, y, width, height);
-	  // // wings
-	  // context.moveTo(xMid - (wingspan/2), y + 13);
-	  // context.lineTo(xMid, y + 5);
-	  // context.lineTo(xMid + (wingspan/2), y + 13);
-	  // context.fill();
-	  // // nose
-	  // context.moveTo(x, y);
-	  // context.lineTo(xMid, y - 5);
-	  // context.lineTo(x + width, y);
-	  // context.fill();
-	  // // fuselage-tail connector
-	  // context.moveTo(x, y + height);
-	  // context.lineTo(xMid, y + height + 5);
-	  // context.lineTo(x + width, y + height);
-	  // context.fill();
-	  // // tail
-	  // context.moveTo(xMid - (tailspan/2), y + 32);
-	  // context.lineTo(xMid, y + 25);
-	  // context.lineTo(xMid + (tailspan/2), y + 32);
-	  // context.fill();
 	};
 
 	Plane.prototype.moveNorth = function () {
