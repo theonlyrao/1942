@@ -94,18 +94,22 @@ describe('Plane', function() {
 	context('has default', function() {
 	    var plane = new Plane({type: "computer"});
 
-	    it('has type of computer', function() {
+	    it('type of computer', function() {
 		assert.equal(plane.type, "computer");
 	    });
 
-	    it('player planes x coordinate', function() {
+	    it('x coordinate', function() {
 		assert.operator(plane.x, "<", 650)
 		assert.operator(plane.x, ">", 50)
 	    });
 
-	    it('player planes y coordinate', function() {
+	    it('y coordinate', function() {
 		assert.equal(plane.y, -30)
 	    });
+
+	    it("heading", function(){
+		assert.includeMembers([ 0, 1 ], [plane.heading]);
+	    })
 	});
     });
 
