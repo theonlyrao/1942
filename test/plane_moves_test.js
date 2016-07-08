@@ -43,37 +43,37 @@ describe('Plane', function() {
 	it('plane is told to move north', function() {
 	    var plane = new Plane({type: "player", x: 350,y: 410});
 	    plane.moveNorth()
-	    assert.equal(plane.y, 403);
+	    assert.equal(plane.y, 409);
 	});
 
 	it('plane is told to move south', function() {
 	    var plane = new Plane({type: "player", x: 350,y: 410});
 	    plane.moveSouth()
-	    assert.equal(plane.y, 417);
+	    assert.equal(plane.y, 411);
 	});
 
 	it('plane is told to move east', function() {
 	    var plane = new Plane({type: "player", x: 350,y: 410});
 	    plane.moveEast()
-	    assert.equal(plane.x, 357);
+	    assert.equal(plane.x, 351);
 	});
 
 	it('plane is told to move west', function() {
 	    var plane = new Plane({type: "player", x: 350,y: 410});
 	    plane.moveWest()
-	    assert.equal(plane.x, 343);
+	    assert.equal(plane.x, 349);
 	});
 
 	it('plane doesnt move north if it hits boundary', function() {
 	    var plane = new Plane({type: "player", x: 350,y: 26});
 	    plane.moveNorth()
-	    assert.equal(plane.y, 26);
+	    assert.equal(plane.y, 25);
 	});
 
 	it('plane doesnt move south if it hits boundary', function() {
 	    var plane = new Plane({type: "player", x: 350,y: 454});
 	    plane.moveSouth()
-	    assert.equal(plane.y, 454);
+	    assert.equal(plane.y, 455);
 	});
 
 	it('plane transfers to west it hits boundary east boundary', function() {
