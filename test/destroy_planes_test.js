@@ -14,7 +14,7 @@ describe('Collision detector', function() {
 	    computer.border = computer.makeBorder();
 	    var first = detector.check(player, computer);
 	    assert.equal(first, false);
-	    player.y--;
+	    player.y = player.y -2;
 	    player.border = player.makeBorder();
 	    computer.border = computer.makeBorder();
 	    var collision = detector.check(player, computer);
