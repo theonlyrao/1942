@@ -4,11 +4,12 @@ const Plane = require('../lib/javascripts/plane');
 
 describe('Plane', function() {
     context('with defaults', function() {
-	var pizza = new Plane({type: "player", x: 100, y: 100});
+	let plane = new Plane({type: "player", x: 100, y: 100});
 
 	it('has a border', function() {
-	    var border = pizza.border;
-	    var expected_border = [[100, 100], [101, 100], [102, 100], [103, 100],
+	    plane.border = plane.makeBorder();
+	    let border = plane.border;
+	    let expected_border = [[100, 100], [101, 100], [102, 100], [103, 100],
 				   [104, 100], [105, 100],[106, 100],[107, 100],
 				   [107, 101],[107, 102],[107, 103],[107, 104],
 				   [107, 105],[107, 106],[107, 107],[107, 108],
@@ -24,7 +25,7 @@ describe('Plane', function() {
 				   [100, 111],[100, 110],[100, 109],[100, 108],
 				   [100, 107],[100, 106],[100, 105],[100, 104],
 				   [100, 103],[100, 102],[100, 101]]
-	    assert.notStrictEqual(expected_border, border);
+	    assert.sameDeepMembers(expected_border, border);
 	});
     });
 
