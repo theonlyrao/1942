@@ -99,8 +99,8 @@ describe('Plane', function() {
 	    });
 
 	    it('x coordinate', function() {
-		assert.operator(plane.x, "<", 650)
-		assert.operator(plane.x, ">", 50)
+		assert.operator(plane.x, "<", 651)
+		assert.operator(plane.x, ">", 49)
 	    });
 
 	    it('y coordinate', function() {
