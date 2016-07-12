@@ -46,83 +46,79 @@
 
 	'use strict';
 
-	var Plane = __webpack_require__(1);
-	var Renderer = __webpack_require__(3);
-	var GameEngine = __webpack_require__(4);
-	var $ = __webpack_require__(6);
+	var SmallComputerPlane = __webpack_require__(1);
+	var BossComputerPlane = __webpack_require__(8);
+	var SmallPlayerPlane = __webpack_require__(9);
+	var Renderer = __webpack_require__(10);
+	var GameEngine = __webpack_require__(11);
+	var $ = __webpack_require__(13);
 
 	var canvas = document.getElementById('nineteenfortytwo');
 	var context = canvas.getContext('2d');
 	var planes = [];
 
 	var computerPlaneFeeder = 0;
-	var playerPlane = new Plane({ type: "player" });
+	var bossCount = 0;
+	var playerPlane = new SmallPlayerPlane({ type: "player" });
+	var bossComputerPlane = new BossComputerPlane({ type: "computer" });
 	planes.push(playerPlane);
 
 	function computerPlanes() {
 	  var speed = Math.floor(Math.random() * (500 - 300) + 300);
-	  if (computerPlaneFeeder % speed === 0) {
-	    var smallComputerPlane = new Plane({ type: "computer" });
+	  if (playerPlane.score >= 1000 && bossCount !== 1) {
+	    bossCount++;
+	    planes.push(bossComputerPlane);
+	  } else if (computerPlaneFeeder > speed && bossCount !== 1) {
+	    computerPlaneFeeder = 0;
+	    var smallComputerPlane = new SmallComputerPlane({ type: "computer" });
 	    planes.push(smallComputerPlane);
 	  };
 	}
 
 	var renderer = new Renderer({ context: context, canvas: canvas });
-
 	var gameEngine = new GameEngine();
-
 	var counter = 0;
 	var startGame = false;
 
 	requestAnimationFrame(function gameLoop() {
 	  if (startGame === false) {
 	    renderer.startScreen();
-	  } else if (playerPlane.status === "dead") {
+	  } else if (playerPlane.status === "dead" || bossComputerPlane.status === "dead") {
 	    renderer.endScreen(playerPlane);
 	  } else {
 	    computerPlanes();
 	    computerPlaneFeeder++;
-	    if (counter > 0 && counter < 20) {
-	      counter++;
-	    } else if (counter === 20) {
-	      counter = 0;
-	    };
+	    counter++;
 	    context.clearRect(0, 0, canvas.width, canvas.height);
-	    renderer.drawPlanes(planes);
-	    renderer.drawBullets(context, planes);
-	    renderer.score(playerPlane);
+	    var livePlanes = planes.filter(function (plane) {
+	      if (plane.status == "alive") {
+	        return true;
+	      }
+	    });
+	    renderer.stats(playerPlane);
+	    renderer.drawPlanes(livePlanes);
 	    gameEngine.animate(planes);
+	    renderer.drawBullets(context, planes);
 	  };
 	  requestAnimationFrame(gameLoop);
 	});
 
 	function repeatCallback(key) {
-
 	  if (key === 87) {
-	    for (var i = 0; i < 7; i++) {
-	      playerPlane.moveNorth();
-	    };
+	    playerPlane.moveNorth(1);
 	  } else if (key === 83) {
-	    for (var i = 0; i < 7; i++) {
-	      playerPlane.moveSouth();
-	    };
+	    playerPlane.moveSouth(1);
 	  } else if (key === 65) {
-	    for (var i = 0; i < 7; i++) {
-	      playerPlane.moveWest();
-	    };
-	  } else if (key === 32) {
-	    if (counter === 0) {
-	      counter = 1;
-	      playerPlane.fire();
-	    };
+	    playerPlane.moveWest(1);
 	  } else if (key === 68) {
-	    for (var i = 0; i < 7; i++) {
-	      playerPlane.moveEast();
-	    };
+	    playerPlane.moveEast(1);
+	  } else if (key === 32 && counter >= 30) {
+	    counter = 0;
+	    playerPlane.fire();
 	  } else if (key === 13) {
 	    startGame = true;
-	  }
-	}
+	  };
+	};
 
 	var repeatState = {};
 	$(document.body).keydown(function (e) {
@@ -130,8 +126,8 @@
 	  if (!repeatState[key]) {
 	    repeatState[key] = setInterval(function () {
 	      repeatCallback(key);
-	    }, 35);
-	  } else {}
+	    }, 8);
+	  }
 	}).keyup(function (e) {
 	  var key = e.which;
 	  var timer = repeatState[key];
@@ -145,39 +141,113 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
+	'use strict';
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var SmallPlane = __webpack_require__(2);
+	var ComputerPlane = __webpack_require__(6);
+	var Mixin = __webpack_require__(7);
+
+	Mixin(SmallPlane, ComputerPlane);
+
+	var SmallComputerPlane = (function (_SmallPlane) {
+	  _inherits(SmallComputerPlane, _SmallPlane);
+
+	  function SmallComputerPlane(options) {
+	    _classCallCheck(this, SmallComputerPlane);
+
+	    _get(Object.getPrototypeOf(SmallComputerPlane.prototype), 'constructor', this).call(this, options);
+	    this.x = options.x || Math.floor(Math.random() * 600) + 50;
+	    this.y = -30;
+	    this.yMid = 5;
+	    this.heading = Math.floor(Math.random() * 2);
+	    this.hitCounterLimit = 1;
+	  }
+
+	  return SmallComputerPlane;
+	})(SmallPlane);
+
+	;
+
+	module.exports = SmallComputerPlane;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
 	"use strict";
 
-	var Bullet = __webpack_require__(2);
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-	function Plane(options) {
-	  if (options.type === "player") {
-	    this.type = options.type;
-	    this.x = options.x || 350;
-	    this.y = options.y || 410;
-	    this.score = 0;
-	    this.status = "alive";
-	    this.width = options.width || 8;
-	    this.height = options.height || 25;
-	    this.wingspan = options.wingspan || 52;
-	    this.tailspan = options.tailspan || 16;
-	    //this.border = border(this);
-	    this.border = [];
-	    this.bullets = [];
-	  } else if (options.type === "computer") {
-	    this.type = options.type;
-	    this.x = options.x || Math.floor(Math.random() * 600) + 50;
-	    this.y = options.y || -30;
-	    this.status = "alive";
-	    this.width = options.width || 8;
-	    this.height = options.height || 25;
-	    this.wingspan = options.wingspan || 52;
-	    this.tailspan = options.tailspan || 16;
-	    this.heading = Math.floor(Math.random() * 2);
-	    //this.border = border(this);
-	    this.border = [];
-	    this.bullets = [];
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Plane = __webpack_require__(3);
+
+	var SmallPlane = (function (_Plane) {
+	  _inherits(SmallPlane, _Plane);
+
+	  function SmallPlane(options) {
+	    _classCallCheck(this, SmallPlane);
+
+	    _get(Object.getPrototypeOf(SmallPlane.prototype), "constructor", this).call(this, options);
+	    this["class"] = "small";
 	  }
+
+	  return SmallPlane;
+	})(Plane);
+
+	;
+
+	SmallPlane.prototype.typeSpecificDimensions = function () {
+	  this.width = 8;
+	  this.height = 25;
+	  this.wingspan = 52;
+	  this.tailspan = 16;
 	};
+
+	module.exports = SmallPlane;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Bullet = __webpack_require__(4);
+	var Border = __webpack_require__(5);
+
+	var Plane = (function (_Border) {
+	  _inherits(Plane, _Border);
+
+	  function Plane(options) {
+	    _classCallCheck(this, Plane);
+
+	    _get(Object.getPrototypeOf(Plane.prototype), 'constructor', this).call(this, options);
+	    this.bullets = [];
+	    this.type = options.type;
+	    this.explodeTimer = 60;
+	    this.hitCounter = 0;
+	    this.status = "alive";
+	    this.typeSpecificDimensions();
+	  }
+
+	  return Plane;
+	})(Border);
+
+	;
 
 	Plane.prototype.fire = function () {
 	  var bullet = new Bullet(this);
@@ -185,93 +255,45 @@
 	  return bullet;
 	};
 
-	//var border = function(plane){
-	Plane.prototype.makeBorder = function () {
-	  var plane = this;
-	  var points = [];
-	  var x = plane.x;
-	  var y = plane.y;
-	  var width = plane.width;
-	  var height = plane.height;
-	  var xMid = plane.x + plane.width / 2;
-
-	  for (var a = x; a < x + width; a = a + 2) {
-
-	    points.push([a, y]);
-	  }
-	  // fill it with pairs from top right to bottom right
-	  for (var b = y + 1; b < y + height; b = b + 2) {
-	    points.push([x + width - 1, b]);
-	  }
-
-	  // fill it with pairs from bottom right to bottom left
-	  for (var c = x + width - 2; c > x; c = c - 2) {
-	    points.push([c, y + height - 1]);
-	  }
-
-	  // fill it with pairs from bottom left back to top left
-	  for (var d = y + height - 1; d > y; d = d - 2) {
-	    points.push([x, d]);
-	  }
-
-	  // fill it with pairs from bottom of the wing
-	  if (plane.type === "computer") {
-	    for (var e = xMid - plane.wingspan / 2; e < xMid + plane.wingspan / 2; e = e + 2) {
-	      if (e != x && e != x + width + 1) {
-	        points.push([e, y + 5]);
-	      }
-	    }
-	  } else if (plane.type === "player") {
-	    for (var e = xMid - plane.wingspan / 2; e < xMid + plane.wingspan / 2; e = e + 2) {
-	      if (e != x && e != x + width + 1) {
-	        points.push([e, y + 13]);
-	      }
-	    }
-	  }
-
-	  return points;
+	Plane.prototype.xMid = function () {
+	  return this.x + this.width / 2;
 	};
 
-	Plane.prototype.move = function () {
-	  this.y = this.y + 1;
-	  if (this.heading === 0) {
-	    this.moveWest();
-	  } else {
-	    this.moveEast();
-	  }
-	};
-
-	Plane.prototype.moveNorth = function () {
-	  if (this.y >= 20) {
-	    this.y = this.y - 1;
+	Plane.prototype.moveNorth = function (num) {
+	  for (var i = 0; i < num; i++) {
+	    if (this.y >= 20) {
+	      this.y = this.y - 1;
+	    };
 	  };
 	};
 
-	Plane.prototype.moveSouth = function () {
-	  if (this.y <= 460) {
-	    this.y = this.y + 1;
+	Plane.prototype.moveSouth = function (num) {
+	  for (var i = 0; i < num; i++) {
+	    if (this.y <= 460) {
+	      this.y = this.y + 1;
+	    };
 	  };
 	};
 
-	Plane.prototype.moveEast = function () {
-	  if (this.x < 730) {
-	    this.x = this.x + 1;
-	  } else {
-	    this.x = -30;
-	  }
-	};
-
-	Plane.prototype.moveWest = function () {
-	  if (this.x > -29) {
-	    this.x = this.x - 1;
-	  } else {
-	    this.x = 730;
+	Plane.prototype.moveEast = function (num) {
+	  for (var i = 0; i < num; i++) {
+	    if (this.x < 730) {
+	      this.x = this.x + 1;
+	    } else {
+	      this.x = -30;
+	    };
 	  };
 	};
 
-	Plane.prototype.increaseScore = function () {
-	  this.score = this.score + 100;
-	  console.log(this.score);
+	Plane.prototype.moveWest = function (num) {
+	  for (var i = 0; i < num; i++) {
+
+	    if (this.x > -29) {
+	      this.x = this.x - 1;
+	    } else {
+	      this.x = 730;
+	    };
+	  };
 	};
 
 	Plane.prototype.destroy = function () {
@@ -281,7 +303,7 @@
 	module.exports = Plane;
 
 /***/ },
-/* 2 */
+/* 4 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -305,13 +327,227 @@
 	  return points;
 	};
 
+	Bullet.prototype.destroy = function () {
+	  this.status = "dead";
+	};
+
 	module.exports = Bullet;
 
 /***/ },
-/* 3 */
+/* 5 */
 /***/ function(module, exports) {
 
 	"use strict";
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Border = function Border(coordinates) {
+	  _classCallCheck(this, Border);
+	};
+
+	;
+
+	Border.prototype.rectangle = function () {
+	  this.border = [];
+	  // fill plane fuselage with coordinates from top left to top right
+	  fillLine(this.width + 1, this, this.x, this.y, 2, "horiz");
+	  // fill plane fuselage with coordinates from top right to bottom right
+	  fillLine(this.height, this, this.x + this.width, this.y + 1, 2, "vert");
+	  // fill plane fuselage with coordinates from bottom right to bottom left
+	  fillLine(this.width, this, this.x + this.width - 1, this.y + this.height, -2, "horiz");
+	  // fill plane fuselage with coordinates from bottom right to top right
+	  fillLine(this.height - 1, this, this.x, this.y + this.height - 1, -2, "vert");
+	};
+
+	function fillLine(length, object, xValue, yValue, posValue, direction) {
+	  for (var i = 0; i < length; i = i + 2) {
+	    object.border.push([xValue, yValue]);
+	    if (direction === "horiz") {
+	      xValue = xValue + posValue;
+	    } else if (direction === "vert") {
+	      yValue = yValue + posValue;
+	    }
+	  };
+	};
+
+	Border.prototype.planeWings = function () {
+	  for (var e = this.xMid() - this.wingspan / 2; e < this.xMid() + this.wingspan / 2; e = e + 2) {
+	    if (e !== this.x && e !== this.x + this.width) {
+	      this.border.push([e, this.y + this.yMid]);
+	    }
+	  }
+	};
+
+	module.exports = Border;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var ComputerPlane = function ComputerPlane(options) {
+	  _classCallCheck(this, ComputerPlane);
+	};
+
+	;
+
+	ComputerPlane.prototype.move = function () {
+	  this.y = this.y + 1;
+	  if (this.heading === 0) {
+	    this.moveWest(1);
+	  } else {
+	    this.moveEast(1);
+	  }
+	};
+
+	module.exports = ComputerPlane;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	function Mixin(target, source) {
+	  target = target.prototype;source = source.prototype;
+
+	  Object.getOwnPropertyNames(source).forEach(function (name) {
+	    if (name !== "constructor") Object.defineProperty(target, name, Object.getOwnPropertyDescriptor(source, name));
+	  });
+	};
+
+	module.exports = Mixin;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Plane = __webpack_require__(3);
+
+	var BossComputerPlane = (function (_Plane) {
+	  _inherits(BossComputerPlane, _Plane);
+
+	  function BossComputerPlane(options) {
+	    _classCallCheck(this, BossComputerPlane);
+
+	    _get(Object.getPrototypeOf(BossComputerPlane.prototype), "constructor", this).call(this, options);
+	    this["class"] = "boss";
+	    this.timerCount = 0;
+	    this.x = options.x || Math.floor(Math.random() * 600) + 50;
+	    this.y = -200;
+	    this.yMid = Math.floor(this.height - this.height / 2);
+	    this.xHeading = Math.floor(Math.random() * 2);
+	    this.yHeading = Math.floor(Math.random() * 2);
+	    this.hitCounterLimit = 8;
+	  }
+
+	  return BossComputerPlane;
+	})(Plane);
+
+	;
+
+	BossComputerPlane.prototype.typeSpecificDimensions = function () {
+	  this.width = 16;
+	  this.height = 50;
+	  this.wingspan = 104;
+	  this.tailspan = 32;
+	};
+
+	BossComputerPlane.prototype.move = function () {
+	  this.timerCount++;
+	  okHeading(this);
+	  this.x = this.x + this.xHeading;
+	  this.y = this.y + this.yHeading;
+	  if (this.timerCount > 75) {
+	    resetHeading(this);
+	  }
+	};
+
+	function resetHeading(plane) {
+	  plane.xHeading = Math.floor(Math.random() * 3) * (Math.round(Math.random()) * 2 - 1);
+	  plane.yHeading = Math.floor(Math.random() * 3) * (Math.round(Math.random()) * 2 - 1);
+	  plane.timerCount = 0;
+	};
+
+	function okHeading(plane) {
+	  if (plane.y < 10) {
+	    plane.yHeading = 1;
+	  }
+	  if (plane.x > 670) {
+	    plane.xHeading = -1;
+	  }
+	  if (plane.y > 100) {
+	    plane.yHeading = -1;
+	  }
+	  if (plane.x < 10) {
+	    plane.xHeading = 1;
+	  }
+	};
+
+	module.exports = BossComputerPlane;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var SmallPlane = __webpack_require__(2);
+
+	var SmallPlayerPlane = (function (_SmallPlane) {
+	  _inherits(SmallPlayerPlane, _SmallPlane);
+
+	  function SmallPlayerPlane(options) {
+	    _classCallCheck(this, SmallPlayerPlane);
+
+	    _get(Object.getPrototypeOf(SmallPlayerPlane.prototype), 'constructor', this).call(this, options);
+	    this.x = options.x || 350;
+	    this.y = options.y || 410;
+	    this.score = 0;
+	    this.yMid = 12;
+	    this.hitCounterLimit = 3;
+	  }
+
+	  return SmallPlayerPlane;
+	})(SmallPlane);
+
+	;
+
+	SmallPlayerPlane.prototype.increaseScore = function () {
+	  this.score = this.score + 100;
+	};
+
+	SmallPlayerPlane.prototype.yMid = function () {
+	  return this.y + this.height / 2;
+	};
+
+	module.exports = SmallPlayerPlane;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var canvas = document.getElementById('nineteenfortytwo');
+	var context = canvas.getContext('2d');
 
 	function Renderer(options) {
 	  this.canvas = options.canvas;
@@ -321,19 +557,20 @@
 	Renderer.prototype.drawBullets = function (context, planes) {
 	  planes.forEach(function (plane) {
 	    plane.bullets.forEach(function (bullet) {
-	      context.fillStyle = "red";
-	      context.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
-	      bullet.border = bullet.makeBorder();
+	      if (bullet.status === "alive") {
+	        context.fillStyle = "red";
+	        context.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+	        bullet.border = bullet.makeBorder();
+	      }
 	    });
 	  });
 	};
 
 	function drawFuselage(context, plane) {
 	  context.fillRect(plane.x, plane.y, plane.width, plane.height);
-	  plane.border = plane.makeBorder();
 	}
 
-	function drawPlayerWings(xMid, context, plane) {
+	function drawPlayerWings(xMid, plane) {
 	  context.beginPath();
 	  context.moveTo(xMid - plane.wingspan / 2, plane.y + 13);
 	  context.lineTo(xMid, plane.y + 5);
@@ -345,6 +582,13 @@
 	  context.moveTo(xMid - plane.wingspan / 2, plane.y + 13);
 	  context.lineTo(xMid, plane.y + 21);
 	  context.lineTo(xMid + plane.wingspan / 2, plane.y + 13);
+	  context.fill();
+	}
+
+	function drawBossComputerWings(xMid, context, plane) {
+	  context.moveTo(xMid - plane.wingspan / 2, plane.y + 17);
+	  context.lineTo(xMid, plane.y + 35);
+	  context.lineTo(xMid + plane.wingspan / 2, plane.y + 17);
 	  context.fill();
 	}
 
@@ -379,29 +623,39 @@
 	Renderer.prototype.drawPlanes = function (planes) {
 	  var context = this.context;
 	  planes.forEach(function (plane) {
-	    if (plane.status === "alive") {
-	      context.fillStyle = "red";
-	      var xMid = plane.x + plane.width / 2;
-	      context.beginPath();
-	      drawFuselage(context, plane);
-	      drawNorthTriangle(xMid, context, plane);
-	      drawSouthTriangle(xMid, context, plane);
+	    plane.rectangle();
+	    plane.planeWings();
+	    context.fillStyle = "red";
+	    var xMid = plane.x + plane.width / 2;
+	    context.beginPath();
+	    drawFuselage(context, plane);
+	    drawNorthTriangle(xMid, context, plane);
+	    drawSouthTriangle(xMid, context, plane);
 
-	      if (plane.type === "player") {
-	        drawPlayerWings(xMid, context, plane);
-	        drawPlayerTail(xMid, context, plane);
-	      } else if (plane.type === "computer") {
-	        drawComputerWings(xMid, context, plane);
-	        drawComputerTail(xMid, context, plane);
-	      }
-	    };
+	    if (plane.type === "player" && plane['class'] === "small") {
+	      context.fillStyle = 'purple';
+	      drawPlayerWings(xMid, plane);
+	      drawPlayerTail(xMid, context, plane);
+	    } else if (plane.type === "computer" && plane['class'] === "small") {
+	      context.fillStyle = 'green';
+	      drawComputerWings(xMid, context, plane);
+	      drawComputerTail(xMid, context, plane);
+	    } else if (plane['class'] === "boss") {
+	      context.fillStyle = 'orange';
+	      drawBossComputerWings(xMid, context, plane);
+	      drawComputerTail(xMid, context, plane);
+	      context.fillStyle = "red";
+	      context.font = "bold 16px Arial";
+	      context.fillText("Boss Lives: " + String(plane.hitCounterLimit - plane.hitCounter), 575, 485);
+	    }
 	  });
 	};
 
-	Renderer.prototype.score = function (player) {
+	Renderer.prototype.stats = function (player) {
 	  this.context.fillStyle = "blue";
 	  this.context.font = "bold 16px Arial";
 	  this.context.fillText("Score: " + player.score, 10, 20);
+	  this.context.fillText("Lives: " + String(player.hitCounterLimit - player.hitCounter), 10, 485);
 	};
 
 	Renderer.prototype.startScreen = function () {
@@ -414,6 +668,7 @@
 	  this.context.fillStyle = "blue";
 	  this.context.font = "bold 16px Arial";
 	  this.context.fillText("Score: " + player.score, 10, 20);
+	  this.context.fillText("Lives: " + String(player.hitCounterLimit - player.hitCounter), 10, 485);
 	  this.context.font = "bold 30px Arial";
 	  this.context.fillText("Game Over", 250, 150);
 	};
@@ -421,73 +676,105 @@
 	module.exports = Renderer;
 
 /***/ },
-/* 4 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
-	var CollisionDetector = __webpack_require__(5);
+	var CollisionDetector = __webpack_require__(12);
 	var detector = new CollisionDetector();
 
 	function GameEngine() {};
+
 	var fireCounter = 0;
 
-	GameEngine.prototype.animate = function (planes) {
-	  fireCounter++;
-	  planes.forEach(function (plane1) {
-	    var bullets = plane1.bullets;
-	    if (plane1.type === "computer") {
-	      plane1.move();
-	      if ((fireCounter % 75 === 0 || plane1.y === -5) && plane1.status === "alive") {
-	        plane1.fire();
-	      };
+	GameEngine.prototype.takeComputerTurn = function (computerPlane) {
+	  computerPlane.move();
+	  if (computerPlane.y > 510) {
+	    computerPlane.destroy();
+	  };
+	  if (fireCounter % 75 === 0 || computerPlane.y === -5) {
+	    computerPlane.fire();
+	  };
+	};
+
+	GameEngine.prototype.moveBullets = function (plane) {
+	  var bullets = plane.bullets.filter(function (bullet) {
+	    if (bullet.status == "alive") {
+	      return true;
+	    };
+	  });
+	  bullets.forEach(function (bullet) {
+	    if (plane.type === "player") {
+	      bullet.y = bullet.y - 3;
+	    } else if (plane.type === "computer") {
+	      bullet.y = bullet.y + 3;
+	    };
+	    if (bullet.y > 510) {
+	      bullet.destroy();
+	    };
+	  });
+	};
+
+	GameEngine.prototype.checkPlayerActions = function (playerPlane, otherPlanes) {
+	  otherPlanes.forEach(function (plane2) {
+	    if (plane2.type === "computer" && detector.check(playerPlane, plane2)) {
+	      playerPlane.hitCounter = 0;
+	      playerPlane.destroy();
+	      plane2.destroy();
 	    };
 
-	    plane1.bullets.forEach(function (bullet) {
-	      if (plane1.type === "player") {
-	        bullet.y = bullet.y - 3;
-	      } else if (plane1.type === "computer") {
-	        bullet.y = bullet.y + 3;
-	      };
-	    });
-
-	    if (plane1.type === "player") {
-	      planes.forEach(function (plane2) {
-	        if (plane2.type === "computer" && detector.check(plane1, plane2)) {
-	          plane1.destroy();
-	          plane2.destroy();
-	          console.log("we have a collision");
-	        };
-
-	        if (plane2.type === "computer") {
-	          bullets.forEach(function (bullet) {
-
-	            if (detector.check(plane2, bullet)) {
-	              console.log("enemy destroyed");
-	              plane1.increaseScore();
-	              plane2.destroy();
-	            };
-	          });
-	        };
-	      });
-	    } else if (plane1.type === "computer") {
-	      planes.forEach(function (plane2) {
-	        if (plane2.type === "player") {
-	          bullets.forEach(function (bullet) {
-	            if (detector.check(plane2, bullet)) {
-	              plane2.destroy();
-	              console.log("player destroyed");
-	            };
-	          });
+	    if (plane2.type === "computer" && playerPlane.bullets.length > 0) {
+	      playerPlane.bullets.forEach(function (bullet) {
+	        if (detector.check(plane2, bullet)) {
+	          playerPlane.increaseScore();
+	          plane2.hitCounter++;
+	          bullet.destroy();
 	        };
 	      });
 	    };
 	  });
 	};
+
+	GameEngine.prototype.checkComputerActions = function (computerPlane, planes) {
+	  if (computerPlane.bullets.length > 0) {
+	    planes.forEach(function (plane) {
+	      if (plane.type === "player") {
+	        computerPlane.bullets.forEach(function (bullet) {
+	          if (detector.check(plane, bullet)) {
+	            plane.hitCounter++;
+	            bullet.destroy();
+	          };
+	        });
+	      };
+	    });
+	  };
+	};
+
+	GameEngine.prototype.animate = function (planes) {
+	  fireCounter++;
+	  var game = this;
+	  planes.forEach(function (plane1) {
+	    game.moveBullets(plane1);
+	    if (plane1.hitCounter === plane1.hitCounterLimit) {
+	      plane1.destroy();
+	    }
+	    if (plane1.type === "computer" && plane1.status == "alive") {
+	      game.takeComputerTurn(plane1);
+	    };
+	    if (plane1.type === "player") {
+	      game.checkPlayerActions(plane1, planes);
+	    }
+	    if (plane1.type === "computer") {
+	      game.checkComputerActions(plane1, planes);
+	    };
+	  });
+	};
+
 	module.exports = GameEngine;
 
 /***/ },
-/* 5 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -516,7 +803,7 @@
 	module.exports = CollisionDetector;
 
 /***/ },
-/* 6 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
