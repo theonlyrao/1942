@@ -1,3 +1,28 @@
 #nineteenfortytwo {
     background-color: CadetBlue;
 }
+
+#instructions {
+    float:right;
+    width:550px;
+    padding-top:2px;
+}
+
+.key {
+    border: 1px solid green;
+    padding: 5px;
+    text-align: center;
+    width: 100px
+}
+
+.key-row {
+    float:right;
+    padding-top:2px;
+}
+
+.spacebar {
+    border: 1px solid green;
+    padding: 5px;
+    text-align: center;
+    width: 300px;
+}
