@@ -1,6 +1,6 @@
 const assert = require('chai').assert;
 
-const Plane = require('../lib/javascripts/plane');
+const Plane = require('../lib/javascripts/planes/plane');
 
 describe('Plane', function() {
     context('is default', function() {

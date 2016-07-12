@@ -47,24 +47,27 @@
 	'use strict';
 
 	var Plane = __webpack_require__(1);
-	var Renderer = __webpack_require__(3);
-	var GameEngine = __webpack_require__(4);
-	var $ = __webpack_require__(6);
+	var SmallComputerPlane = __webpack_require__(3);
+	var SmallPlayerPlane = __webpack_require__(4);
+	var Renderer = __webpack_require__(5);
+	var GameEngine = __webpack_require__(6);
+	var $ = __webpack_require__(8);
 
 	var canvas = document.getElementById('nineteenfortytwo');
 	var context = canvas.getContext('2d');
 	var planes = [];
 
 	var computerPlaneFeeder = 0;
-	var playerPlane = new Plane({ type: "player" });
+	var playerPlane = new SmallPlayerPlane({ type: "player" });
+
 	planes.push(playerPlane);
 
 	function computerPlanes() {
-	  var speed = Math.floor(Math.random() * (500 - 300) + 300);
-	  if (computerPlaneFeeder % speed === 0) {
-	    var smallComputerPlane = new Plane({ type: "computer" });
-	    planes.push(smallComputerPlane);
-	  };
+				var speed = Math.floor(Math.random() * (500 - 300) + 300);
+				if (computerPlaneFeeder % speed === 0) {
+							var smallComputerPlane = new SmallComputerPlane({ type: "computer" });
+							planes.push(smallComputerPlane);
+				};
 	}
 
 	var renderer = new Renderer({ context: context, canvas: canvas });
@@ -75,70 +78,76 @@
 	var startGame = false;
 
 	requestAnimationFrame(function gameLoop() {
-	  if (startGame === false) {
-	    renderer.startScreen();
-	  } else if (playerPlane.status === "dead") {
-	    renderer.endScreen(playerPlane);
-	  } else {
-	    computerPlanes();
-	    computerPlaneFeeder++;
-	    if (counter > 0 && counter < 20) {
-	      counter++;
-	    } else if (counter === 20) {
-	      counter = 0;
-	    };
-	    context.clearRect(0, 0, canvas.width, canvas.height);
-	    renderer.drawPlanes(planes);
-	    renderer.drawBullets(context, planes);
-	    renderer.score(playerPlane);
-	    gameEngine.animate(planes);
-	  };
-	  requestAnimationFrame(gameLoop);
+				if (startGame === false) {
+							renderer.startScreen();
+				} else if (playerPlane.status === "dead") {
+							renderer.endScreen(playerPlane);
+				} else {
+							computerPlanes();
+							computerPlaneFeeder++;
+							if (counter > 0 && counter < 20) {
+										counter++;
+							} else if (counter === 20) {
+										counter = 0;
+							};
+							context.clearRect(0, 0, canvas.width, canvas.height);
+
+							var livePlanes = planes.filter(function (plane) {
+										if (plane.status == "alive") {
+													return true;
+										}
+							});
+							renderer.drawPlanes(livePlanes);
+							renderer.drawBullets(context, planes);
+							renderer.score(playerPlane);
+							gameEngine.animate(planes);
+				};
+				requestAnimationFrame(gameLoop);
 	});
 
 	function repeatCallback(key) {
 
-	  if (key === 87) {
-	    for (var i = 0; i < 7; i++) {
-	      playerPlane.moveNorth();
-	    };
-	  } else if (key === 83) {
-	    for (var i = 0; i < 7; i++) {
-	      playerPlane.moveSouth();
-	    };
-	  } else if (key === 65) {
-	    for (var i = 0; i < 7; i++) {
-	      playerPlane.moveWest();
-	    };
-	  } else if (key === 32) {
-	    if (counter === 0) {
-	      counter = 1;
-	      playerPlane.fire();
-	    };
-	  } else if (key === 68) {
-	    for (var i = 0; i < 7; i++) {
-	      playerPlane.moveEast();
-	    };
-	  } else if (key === 13) {
-	    startGame = true;
-	  }
+				if (key === 87) {
+							for (var i = 0; i < 7; i++) {
+										playerPlane.moveNorth();
+							};
+				} else if (key === 83) {
+							for (var i = 0; i < 7; i++) {
+										playerPlane.moveSouth();
+							};
+				} else if (key === 65) {
+							for (var i = 0; i < 7; i++) {
+										playerPlane.moveWest();
+							};
+				} else if (key === 32) {
+							if (counter === 0) {
+										counter = 1;
+										playerPlane.fire();
+							};
+				} else if (key === 68) {
+							for (var i = 0; i < 7; i++) {
+										playerPlane.moveEast();
+							};
+				} else if (key === 13) {
+							startGame = true;
+				}
 	}
 
 	var repeatState = {};
 	$(document.body).keydown(function (e) {
-	  var key = e.which;
-	  if (!repeatState[key]) {
-	    repeatState[key] = setInterval(function () {
-	      repeatCallback(key);
-	    }, 35);
-	  } else {}
+				var key = e.which;
+				if (!repeatState[key]) {
+							repeatState[key] = setInterval(function () {
+										repeatCallback(key);
+							}, 35);
+				} else {}
 	}).keyup(function (e) {
-	  var key = e.which;
-	  var timer = repeatState[key];
-	  if (timer) {
-	    clearInterval(timer);
-	    delete repeatState[key];
-	  }
+				var key = e.which;
+				var timer = repeatState[key];
+				if (timer) {
+							clearInterval(timer);
+							delete repeatState[key];
+				}
 	});
 
 /***/ },
@@ -147,20 +156,21 @@
 
 	"use strict";
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	var Bullet = __webpack_require__(2);
 
-	function Plane(options) {
+	var Plane = function Plane(options) {
+	  _classCallCheck(this, Plane);
+
 	  if (options.type === "player") {
 	    this.type = options.type;
 	    this.x = options.x || 350;
 	    this.y = options.y || 410;
 	    this.score = 0;
 	    this.status = "alive";
-	    this.width = options.width || 8;
-	    this.height = options.height || 25;
 	    this.wingspan = options.wingspan || 52;
 	    this.tailspan = options.tailspan || 16;
-	    //this.border = border(this);
 	    this.border = [];
 	    this.bullets = [];
 	  } else if (options.type === "computer") {
@@ -168,8 +178,6 @@
 	    this.x = options.x || Math.floor(Math.random() * 600) + 50;
 	    this.y = options.y || -30;
 	    this.status = "alive";
-	    this.width = options.width || 8;
-	    this.height = options.height || 25;
 	    this.wingspan = options.wingspan || 52;
 	    this.tailspan = options.tailspan || 16;
 	    this.heading = Math.floor(Math.random() * 2);
@@ -179,13 +187,19 @@
 	  }
 	};
 
+	;
+
+	Plane.prototype.smallPlaneDimensions = function () {
+	  this.width = 8;
+	  this.height = 8;
+	};
+
 	Plane.prototype.fire = function () {
 	  var bullet = new Bullet(this);
 	  this.bullets.push(bullet);
 	  return bullet;
 	};
 
-	//var border = function(plane){
 	Plane.prototype.makeBorder = function () {
 	  var plane = this;
 	  var points = [];
@@ -271,7 +285,6 @@
 
 	Plane.prototype.increaseScore = function () {
 	  this.score = this.score + 100;
-	  console.log(this.score);
 	};
 
 	Plane.prototype.destroy = function () {
@@ -305,189 +318,284 @@
 	  return points;
 	};
 
+	Bullet.prototype.destroy = function () {
+	  this.status = "dead";
+	};
+
 	module.exports = Bullet;
 
 /***/ },
 /* 3 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
-	function Renderer(options) {
-	  this.canvas = options.canvas;
-	  this.context = options.context;
-	};
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-	Renderer.prototype.drawBullets = function (context, planes) {
-	  planes.forEach(function (plane) {
-	    plane.bullets.forEach(function (bullet) {
-	      context.fillStyle = "red";
-	      context.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
-	      bullet.border = bullet.makeBorder();
-	    });
-	  });
-	};
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	function drawFuselage(context, plane) {
-	  context.fillRect(plane.x, plane.y, plane.width, plane.height);
-	  plane.border = plane.makeBorder();
-	}
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	function drawPlayerWings(xMid, context, plane) {
-	  context.beginPath();
-	  context.moveTo(xMid - plane.wingspan / 2, plane.y + 13);
-	  context.lineTo(xMid, plane.y + 5);
-	  context.lineTo(xMid + plane.wingspan / 2, plane.y + 13);
-	  context.fill();
-	}
+	var Plane = __webpack_require__(1);
 
-	function drawComputerWings(xMid, context, plane) {
-	  context.moveTo(xMid - plane.wingspan / 2, plane.y + 13);
-	  context.lineTo(xMid, plane.y + 21);
-	  context.lineTo(xMid + plane.wingspan / 2, plane.y + 13);
-	  context.fill();
-	}
+	var SmallComputerPlane = (function (_Plane) {
+	  _inherits(SmallComputerPlane, _Plane);
 
-	function drawNorthTriangle(xMid, context, plane) {
-	  context.moveTo(plane.x, plane.y);
-	  context.lineTo(xMid, plane.y - 5);
-	  context.lineTo(plane.x + plane.width, plane.y);
-	  context.fill();
-	}
+	  function SmallComputerPlane(options) {
+	    _classCallCheck(this, SmallComputerPlane);
 
-	function drawSouthTriangle(xMid, context, plane) {
-	  context.moveTo(plane.x, plane.y + plane.height);
-	  context.lineTo(xMid, plane.y + plane.height + 5);
-	  context.lineTo(plane.x + plane.width, plane.y + plane.height);
-	  context.fill();
-	}
+	    _get(Object.getPrototypeOf(SmallComputerPlane.prototype), 'constructor', this).call(this, options);
 
-	function drawPlayerTail(xMid, context, plane) {
-	  context.moveTo(xMid - plane.tailspan / 2, plane.y + 32);
-	  context.lineTo(xMid, plane.y + 25);
-	  context.lineTo(xMid + plane.tailspan / 2, plane.y + 32);
-	  context.fill();
-	}
+	    Plane.smallPlaneDimensions();
+	  }
 
-	function drawComputerTail(xMid, context, plane) {
-	  context.moveTo(xMid - plane.tailspan / 2, plane.y - 7);
-	  context.lineTo(xMid, plane.y);
-	  context.lineTo(xMid + plane.tailspan / 2, plane.y - 7);
-	  context.fill();
-	}
+	  return SmallComputerPlane;
+	})(Plane);
 
-	Renderer.prototype.drawPlanes = function (planes) {
-	  var context = this.context;
-	  planes.forEach(function (plane) {
-	    if (plane.status === "alive") {
-	      context.fillStyle = "red";
-	      var xMid = plane.x + plane.width / 2;
-	      context.beginPath();
-	      drawFuselage(context, plane);
-	      drawNorthTriangle(xMid, context, plane);
-	      drawSouthTriangle(xMid, context, plane);
+	;
 
-	      if (plane.type === "player") {
-	        drawPlayerWings(xMid, context, plane);
-	        drawPlayerTail(xMid, context, plane);
-	      } else if (plane.type === "computer") {
-	        drawComputerWings(xMid, context, plane);
-	        drawComputerTail(xMid, context, plane);
-	      }
-	    };
-	  });
-	};
-
-	Renderer.prototype.score = function (player) {
-	  this.context.fillStyle = "blue";
-	  this.context.font = "bold 16px Arial";
-	  this.context.fillText("Score: " + player.score, 10, 20);
-	};
-
-	Renderer.prototype.startScreen = function () {
-	  this.context.fillStyle = "blue";
-	  this.context.font = "bold 30px Arial";
-	  this.context.fillText("Press Enter To Start", 250, 150);
-	};
-
-	Renderer.prototype.endScreen = function (player) {
-	  this.context.fillStyle = "blue";
-	  this.context.font = "bold 16px Arial";
-	  this.context.fillText("Score: " + player.score, 10, 20);
-	  this.context.font = "bold 30px Arial";
-	  this.context.fillText("Game Over", 250, 150);
-	};
-
-	module.exports = Renderer;
+	module.exports = SmallComputerPlane;
 
 /***/ },
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
-	var CollisionDetector = __webpack_require__(5);
-	var detector = new CollisionDetector();
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-	function GameEngine() {};
-	var fireCounter = 0;
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	GameEngine.prototype.animate = function (planes) {
-	  fireCounter++;
-	  planes.forEach(function (plane1) {
-	    var bullets = plane1.bullets;
-	    if (plane1.type === "computer") {
-	      plane1.move();
-	      if ((fireCounter % 75 === 0 || plane1.y === -5) && plane1.status === "alive") {
-	        plane1.fire();
-	      };
-	    };
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	    plane1.bullets.forEach(function (bullet) {
-	      if (plane1.type === "player") {
-	        bullet.y = bullet.y - 3;
-	      } else if (plane1.type === "computer") {
-	        bullet.y = bullet.y + 3;
-	      };
-	    });
+	var Plane = __webpack_require__(1);
 
-	    if (plane1.type === "player") {
-	      planes.forEach(function (plane2) {
-	        if (plane2.type === "computer" && detector.check(plane1, plane2)) {
-	          plane1.destroy();
-	          plane2.destroy();
-	          console.log("we have a collision");
-	        };
+	var SmallPlayerPlane = (function (_Plane) {
+	  _inherits(SmallPlayerPlane, _Plane);
 
-	        if (plane2.type === "computer") {
-	          bullets.forEach(function (bullet) {
+	  function SmallPlayerPlane(options) {
+	    _classCallCheck(this, SmallPlayerPlane);
 
-	            if (detector.check(plane2, bullet)) {
-	              console.log("enemy destroyed");
-	              plane1.increaseScore();
-	              plane2.destroy();
-	            };
-	          });
-	        };
-	      });
-	    } else if (plane1.type === "computer") {
-	      planes.forEach(function (plane2) {
-	        if (plane2.type === "player") {
-	          bullets.forEach(function (bullet) {
-	            if (detector.check(plane2, bullet)) {
-	              plane2.destroy();
-	              console.log("player destroyed");
-	            };
-	          });
-	        };
-	      });
-	    };
-	  });
-	};
-	module.exports = GameEngine;
+	    _get(Object.getPrototypeOf(SmallPlayerPlane.prototype), 'constructor', this).call(this, options);
+
+	    // Plane.smallPlaneDimensions()
+	  }
+
+	  return SmallPlayerPlane;
+	})(Plane);
+
+	;
+
+	module.exports = SmallPlayerPlane;
 
 /***/ },
 /* 5 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	function Renderer(options) {
+	    this.canvas = options.canvas;
+	    this.context = options.context;
+	};
+
+	Renderer.prototype.drawBullets = function (context, planes) {
+	    planes.forEach(function (plane) {
+	        plane.bullets.forEach(function (bullet) {
+	            if (bullet.status === "alive") {
+	                context.fillStyle = "red";
+	                context.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+	                bullet.border = bullet.makeBorder();
+	            }
+	        });
+	    });
+	};
+
+	function drawFuselage(context, plane) {
+	    context.fillRect(plane.x, plane.y, plane.width, plane.height);
+	    plane.border = plane.makeBorder();
+	}
+
+	function drawPlayerWings(xMid, context, plane) {
+	    context.beginPath();
+	    context.moveTo(xMid - plane.wingspan / 2, plane.y + 13);
+	    context.lineTo(xMid, plane.y + 5);
+	    context.lineTo(xMid + plane.wingspan / 2, plane.y + 13);
+	    context.fill();
+	}
+
+	function drawComputerWings(xMid, context, plane) {
+	    context.moveTo(xMid - plane.wingspan / 2, plane.y + 13);
+	    context.lineTo(xMid, plane.y + 21);
+	    context.lineTo(xMid + plane.wingspan / 2, plane.y + 13);
+	    context.fill();
+	}
+
+	function drawNorthTriangle(xMid, context, plane) {
+	    context.moveTo(plane.x, plane.y);
+	    context.lineTo(xMid, plane.y - 5);
+	    context.lineTo(plane.x + plane.width, plane.y);
+	    context.fill();
+	}
+
+	function drawSouthTriangle(xMid, context, plane) {
+	    context.moveTo(plane.x, plane.y + plane.height);
+	    context.lineTo(xMid, plane.y + plane.height + 5);
+	    context.lineTo(plane.x + plane.width, plane.y + plane.height);
+	    context.fill();
+	}
+
+	function drawPlayerTail(xMid, context, plane) {
+	    context.moveTo(xMid - plane.tailspan / 2, plane.y + 32);
+	    context.lineTo(xMid, plane.y + 25);
+	    context.lineTo(xMid + plane.tailspan / 2, plane.y + 32);
+	    context.fill();
+	}
+
+	function drawComputerTail(xMid, context, plane) {
+	    context.moveTo(xMid - plane.tailspan / 2, plane.y - 7);
+	    context.lineTo(xMid, plane.y);
+	    context.lineTo(xMid + plane.tailspan / 2, plane.y - 7);
+	    context.fill();
+	}
+
+	Renderer.prototype.drawPlanes = function (planes) {
+	    var context = this.context;
+	    planes.forEach(function (plane) {
+	        context.fillStyle = "red";
+	        var xMid = plane.x + plane.width / 2;
+	        context.beginPath();
+	        drawFuselage(context, plane);
+	        drawNorthTriangle(xMid, context, plane);
+	        drawSouthTriangle(xMid, context, plane);
+
+	        if (plane.type === "player") {
+	            drawPlayerWings(xMid, context, plane);
+	            drawPlayerTail(xMid, context, plane);
+	        } else if (plane.type === "computer") {
+	            drawComputerWings(xMid, context, plane);
+	            drawComputerTail(xMid, context, plane);
+	        }
+	    });
+	};
+
+	Renderer.prototype.score = function (player) {
+	    this.context.fillStyle = "blue";
+	    this.context.font = "bold 16px Arial";
+	    this.context.fillText("Score: " + player.score, 10, 20);
+	};
+
+	Renderer.prototype.startScreen = function () {
+	    this.context.fillStyle = "blue";
+	    this.context.font = "bold 30px Arial";
+	    this.context.fillText("Press Enter To Start", 250, 150);
+	};
+
+	Renderer.prototype.endScreen = function (player) {
+	    this.context.fillStyle = "blue";
+	    this.context.font = "bold 16px Arial";
+	    this.context.fillText("Score: " + player.score, 10, 20);
+	    this.context.font = "bold 30px Arial";
+	    this.context.fillText("Game Over", 250, 150);
+	};
+
+	module.exports = Renderer;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var CollisionDetector = __webpack_require__(7);
+	var detector = new CollisionDetector();
+
+	function GameEngine() {};
+
+	var fireCounter = 0;
+
+	GameEngine.prototype.takeComputerTurn = function (computerPlane) {
+				computerPlane.move();
+				if (computerPlane.y > 510) {
+							computerPlane.destroy();
+				}
+				if (fireCounter % 75 === 0 || computerPlane.y === -5) {
+							computerPlane.fire();
+				};
+	};
+
+	GameEngine.prototype.moveBullets = function (plane) {
+				var bullets = plane.bullets.filter(function (bullet) {
+							if (bullet.status == "alive") {
+										return true;
+							}
+				});
+				bullets.forEach(function (bullet) {
+							if (plane.type === "player") {
+										bullet.y = bullet.y - 3;
+							} else if (plane.type === "computer") {
+										bullet.y = bullet.y + 3;
+							};
+							if (bullet.y > 510) {
+										bullet.destroy();
+							}
+				});
+	};
+
+	GameEngine.prototype.checkPlayerActions = function (playerPlane, otherPlanes) {
+				otherPlanes.forEach(function (plane2) {
+							if (plane2.type === "computer" && detector.check(playerPlane, plane2)) {
+										playerPlane.destroy();
+										plane2.destroy();
+							}
+
+							if (plane2.type === "computer" && playerPlane.bullets.length > 0) {
+										playerPlane.bullets.forEach(function (bullet) {
+													if (detector.check(plane2, bullet)) {
+																playerPlane.increaseScore();
+																plane2.destroy();
+																bullet.destroy();
+													};
+										});
+							};
+				});
+	};
+
+	GameEngine.prototype.checkComputerActions = function (computerPlane, planes) {
+				if (computerPlane.bullets.length > 0) {
+							planes.forEach(function (plane) {
+										if (plane.type === "player") {
+													computerPlane.bullets.forEach(function (bullet) {
+																if (detector.check(plane, bullet)) {
+																			plane.destroy();
+																};
+													});
+										}
+							});
+				}
+	};
+
+	GameEngine.prototype.animate = function (planes) {
+				fireCounter++;
+				var game = this;
+				planes.forEach(function (plane1) {
+							game.moveBullets(plane1);
+							if (plane1.type === "computer" && plane1.status == "alive") {
+										game.takeComputerTurn(plane1);
+							};
+							if (plane1.type === "player") {
+										game.checkPlayerActions(plane1, planes);
+							}
+							if (plane1.type === "computer") {
+										game.checkComputerActions(plane1, planes);
+							};
+				});
+	};
+
+	module.exports = GameEngine;
+
+/***/ },
+/* 7 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -516,7 +624,7 @@
 	module.exports = CollisionDetector;
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
