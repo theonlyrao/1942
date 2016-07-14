@@ -1,10 +1,12 @@
 #nineteenfortytwo {
+    float: left;
     background-color: CadetBlue;
 }
 
 #instructions {
-    float:right;
-    width:550px;
+    float: right;
+    width: 400px;
+    padding-right: 50px;
     padding-top:2px;
 }
 
