@@ -1,10 +1,10 @@
 ### 1942
 
 ## Overview:
-This game, built by Thom Pickett and Ashwin Rao, is a remake of the arcade game "1942". It is built with JavaScript on webpack using the [Turing School Game Time Starter Kit](https://github.com/turingschool-examples/game-time-starter-kit). It is available online at [here](https://theonlyrao.github.io/1942/).
+This game, built by Thom Pickett and Ashwin Rao, is a remake of the arcade game "1942". It is built with JavaScript on webpack using the [Turing School Game Time Starter Kit](https://github.com/turingschool-examples/game-time-starter-kit). It is available online [here](https://nineteenfortytwo.github.io/).
 	
 ## Gameplay:
-![Watch our 1942 in action](http://recordit.co/euJcHftVgy.gif)
+![Watch our 1942 in action](http://g.recordit.co/CFKRDrEaC1.gif)
 
 ## To install the dependencies:
 
